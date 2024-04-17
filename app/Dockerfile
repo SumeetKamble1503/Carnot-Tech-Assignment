@@ -8,9 +8,9 @@ RUN pip3 install -r requirements.txt
 
 COPY . /app
 
-# Set environment variables
-ENV FLASK_DEBUG 1
-ENV FLASK_RUN_PORT 5000
+# # Set environment variables
+# ENV FLASK_DEBUG 1
+# ENV FLASK_RUN_PORT 5000
 
 CMD [ "python3", "-m" , "flask", "run", "--host=0.0.0.0"]
 
