@@ -1,13 +1,30 @@
 version: "3"
 
 services:
+  # redis:
+  #   image: redis:latest
+  #   ports:
+  #     - "6379:6379"
+  #   volumes:
+  #     - ./redis:/data
+
   redis:
     image: redis:latest
+    container_name: redis-server
+    volumes:
+      - /redis/redis.conf:/usr/local/etc/redis/redis.conf
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
     ports:
       - "6379:6379"
-    volumes:
-      - ./redis:/data
+
   app:
     build: ./app
     ports:
       - "5000:5000"
+
+  # registry:
+  #   build: ./p3x
+  #   ports:
+  #     - "7843:7843"
+  #   volumes:
+  #     - /home/user/p3x-redis-ui-settings:/settings

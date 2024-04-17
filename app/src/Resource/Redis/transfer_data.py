@@ -1,11 +1,15 @@
-from flask import jsonify
-import Resource
+from flask import jsonify, make_response
+from flask_restful import Resource
 import pandas as pd
 import redis
 
 class TransferData(Resource):
+    def __init__(self):
+        pass
+
     def get(self):
         try:
+        
             # Load Excel file into DataFrame
             df = pd.read_excel('./assignment/raw_data (4) (6).csv')
 
@@ -28,10 +32,12 @@ class TransferData(Resource):
                 # Store data in Redis hash with key as device ID
                 r.hmset(f'device:{device_id}', data)
 
-            return jsonify({'message': 'Data transferred to Redis successfully!'}), 200
+            return ({'message': 'Data transferred to Redis successfully!'}), 200
 
         except Exception as e:
-            return jsonify({'error': str(e)}), 500
+            print("SK")
+            print(str(e))
+            return ({'error': str(e)}), 500
         
 class DeleteData(Resource):
     def delete(self):
