@@ -1,19 +1,24 @@
 import datetime
-from flask import Flask, request
-# from flask_restful import Api
-# # from routes import TransferData, DeleteData
-# from flask_cors import CORS
+from flask import Flask, jsonify, request
 import pandas as pd
 import redis
-from routes import create_routes
+from src.routes import create_routes
 import json
-from flask_restful import reqparse
-# from routes import routes
+from flask_restful import reqparse,Api
 app = Flask(__name__)
-# app.register_blueprint(routes)
-@app.route('/')
-def index():
-    return 'Hello, SK !'
+
+# app = create_app()
+BASE_PATH = '/api/v1/'
+
+# CORS(app)
+api = Api(app, BASE_PATH)
+create_routes(api)
+
+
+@app.route("/health-check")
+def health_check():
+    response = { "status": 200 , "data": "Success" }
+    return jsonify(response)
 
 @app.route('/transfer_data_test')
 def transfer_data_test():
@@ -151,7 +156,7 @@ def LocationPoints(device_id):
 
         except ValueError as e:
             return {'error': str(e)}, 400
-# create_routes(app)
+
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')

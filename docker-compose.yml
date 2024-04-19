@@ -21,10 +21,3 @@ services:
     build: ./app
     ports:
       - "5000:5000"
-
-  # registry:
-  #   build: ./p3x
-  #   ports:
-  #     - "7843:7843"
-  #   volumes:
-  #     - /home/user/p3x-redis-ui-settings:/settings
