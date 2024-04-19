@@ -21,3 +21,5 @@ services:
     build: ./app
     ports:
       - "5000:5000"
+    environment:
+      FLASK_DEBUG: "1"
