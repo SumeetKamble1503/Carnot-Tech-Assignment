@@ -19,7 +19,7 @@ class LatestLocation(Resource):
         try:
             LatestLocationRequestModel(device_id=device_id)
             # Get the latest location for the specified device ID
-            latest_location = self.redis_client.zrevrange(f'device:{device_id}:locations', 0, 0, withscores=True)
+            latest_location = self.redis_client.zrevrange(device_id, 0, 0, withscores=True)
             if latest_location:
                 latest_location = latest_location[0]
                 latitude, longitude, timestamp = latest_location[0].decode('utf-8').split(',')
@@ -48,8 +48,8 @@ class StartEndLocation(Resource):
         try:
             request_data = StartEndLocationRequestModel(device_id=device_id)
             # Get the start and end location for the specified device ID
-            start_location = self.redis_client.zrange(f'device:{device_id}:locations', 0, 0)
-            end_location = self.redis_client.zrange(f'device:{device_id}:locations', -1, -1)
+            start_location = self.redis_client.zrange(device_id, 0, 0)
+            end_location = self.redis_client.zrange(device_id, -1, -1)
             if start_location and end_location:
                 start_latitude, start_longitude, start_timestamp = start_location[0].decode('utf-8').split(',')
                 end_latitude, end_longitude, end_timestamp = end_location[0].decode('utf-8').split(',')
@@ -95,7 +95,7 @@ class LocationPoints(Resource):
                 return {'error': 'End time must be later than start time'}, 400
             
             # Get location points for the specified device ID within the specified time range
-            location_points = self.redis_client.zrangebyscore(f'device:{device_id}:locations', start_datetime.timestamp(), end_datetime.timestamp(), withscores=True)
+            location_points = self.redis_client.zrangebyscore(device_id, start_datetime.timestamp(), end_datetime.timestamp(), withscores=True)
 
             if location_points:
                 # Extract latitude, longitude, and timestamp from each location point

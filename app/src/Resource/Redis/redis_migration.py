@@ -28,15 +28,12 @@ class TransferData(Resource):
             # Sort DataFrame by device ID and time_stamp in descending order
             df_sorted = df.sort_values(by=['device_fk_id', 'sts'], ascending=[True, False])
 
-            # Connect to Redis
-            r = redis.StrictRedis(host='redis', port=6379, db=0)
-
             for _, row in df_sorted.iterrows():
                 device_id = row['device_fk_id']
                 timestamp = row['time_stamp']
                 location = f"{row['latitude']},{row['longitude']},{timestamp}"
                 # Store location data in Redis Sorted Set with key as device ID
-                r.zadd(f'device:{device_id}:locations', {location: pd.Timestamp(timestamp).timestamp()})
+                self.redis_client.zadd(device_id, {location: pd.Timestamp(timestamp).timestamp()})
 
             return {'message': 'Data transferred to Redis successfully!'}, 200
         except Exception as e:

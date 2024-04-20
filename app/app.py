@@ -7,7 +7,7 @@ import json
 from flask_restful import reqparse,Api
 from redis.client import Redis
 import os
-# app = Flask(__name__)
+ 
 def create_app():
     app = Flask(__name__)
     redis_host = os.environ.get("REDIS_DB_HOST")
