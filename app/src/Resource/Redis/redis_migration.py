@@ -3,7 +3,7 @@ from flask_restful import Resource
 import pandas as pd
 import redis
 from flask import make_response, current_app as app
-
+import json
 class TransferData(Resource):
     def __init__(self):
         self.redis_client = app.config['REDIS_CLIENT']
@@ -25,17 +25,21 @@ class TransferData(Resource):
             # Load Excel file into DataFrame
             df = pd.read_csv(absolute_path)
 
-            # Sort DataFrame by device ID and time_stamp in descending order
-            df_sorted = df.sort_values(by=['device_fk_id', 'sts'], ascending=[True, False])
+            # Sort data by device ID and sts time in ascending
+            df_sorted = df.sort_values(by=["device_fk_id", "sts"], ascending=[True, True])
 
+            # Migrate data to Redis
             for _, row in df_sorted.iterrows():
-                device_id = row['device_fk_id']
-                timestamp = row['time_stamp']
-                location = f"{row['latitude']},{row['longitude']},{timestamp}"
-                # Store location data in Redis Sorted Set with key as device ID
-                self.redis_client.zadd(device_id, {location: pd.Timestamp(timestamp).timestamp()})
+                device_id = row["device_fk_id"]
+                timestamp = row["time_stamp"]
+                location = (row["latitude"], row["longitude"])
+                speed = row["speed"]
+                data = {"location": location, "timestamp": timestamp, "speed": speed}
+                
+                # If timestamp is repeated then the new data will be updated
+                self.redis_client.zadd(device_id, {json.dumps(data): pd.Timestamp(timestamp).timestamp()})
 
-            return {'message': 'Data transferred to Redis successfully!'}, 200
+            return {"message": "Data migrated to Redis successfully"}, 200
         except Exception as e:
             return {'error': str(e)}, 500
     
