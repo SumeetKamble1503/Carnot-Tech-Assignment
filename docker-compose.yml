@@ -17,10 +17,21 @@ services:
     ports:
       - "6379:6379"
 
+  # backend:
+  #   container_name: flask-app
+  #   build: ./app
+  #   ports:
+  #     - "5000:5000"
+  #   environment:
+  #     FLASK_DEBUG: "1"
   backend:
     container_name: flask-app
-    build: ./app
+    build:
+      context: ./app
+      dockerfile: Dockerfile
     ports:
       - "5000:5000"
     environment:
       FLASK_DEBUG: "1"
+    volumes:
+      - .:/app

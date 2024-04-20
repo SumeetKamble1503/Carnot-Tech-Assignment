@@ -5,9 +5,18 @@ import redis
 from src.routes import create_routes
 import json
 from flask_restful import reqparse,Api
-app = Flask(__name__)
+from redis.client import Redis
+import os
+# app = Flask(__name__)
+def create_app():
+    app = Flask(__name__)
+    redis_host = os.environ.get("REDIS_DB_HOST")
+    redis_port = os.environ.get("REDIS_DB_PORT")
+    redis_client = Redis(host=redis_host, port=redis_port)
+    app.config['REDIS_CLIENT'] = redis_client
+    return app
 
-# app = create_app()
+app = create_app()
 BASE_PATH = '/api/v1/'
 
 # CORS(app)

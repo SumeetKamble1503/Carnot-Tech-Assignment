@@ -12,7 +12,8 @@ from pydantic import ValidationError
 
 class LatestLocation(Resource):
     def __init__(self):
-        self.redis_client = redis.StrictRedis(host='redis', port=6379, db=0)
+        self.redis_client = app.config['REDIS_CLIENT']
+        # self.redis_client = redis.StrictRedis(host='redis', port=6379, db=0)
         
     def get(self,device_id):
         try:
@@ -40,7 +41,8 @@ class LatestLocation(Resource):
 
 class StartEndLocation(Resource):
     def __init__(self):
-        self.redis_client = redis.StrictRedis(host='redis', port=6379, db=0)
+        self.redis_client = app.config['REDIS_CLIENT']
+        # self.redis_client = redis.StrictRedis(host='redis', port=6379, db=0)
     
     def get(self,device_id):
         try:
@@ -69,7 +71,8 @@ class StartEndLocation(Resource):
         
 class LocationPoints(Resource):
     def __init__(self):
-        self.redis_client = redis.StrictRedis(host='redis', port=6379, db=0)
+        self.redis_client = app.config['REDIS_CLIENT']
+        # self.redis_client = redis.StrictRedis(host='redis', port=6379, db=0)
         self.parser = reqparse.RequestParser()
         self.parser.add_argument('start_time', type=str, help='Start time (format: YYYY-MM-DDTHH:MM:SSZ)')
         self.parser.add_argument('end_time', type=str, help='End time (format: YYYY-MM-DDTHH:MM:%SSZ)')
