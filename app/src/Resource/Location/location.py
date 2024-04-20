@@ -7,7 +7,7 @@ import redis
 from datetime import datetime
 from src.Models import LatestLocationRequestModel, LatestLocationResponseModel
 from src.Models import StartEndLocationRequestModel, StartEndLocationResponseModel
-from src.Models import LocationPointsRequestModel, LocationPointsResponseModel
+from src.Models import LocationPointsRequestModel, LocationPointsResponseModel, LocationPointModel
 from pydantic import ValidationError
 
 class LatestLocation(Resource):
@@ -18,20 +18,15 @@ class LatestLocation(Resource):
     def get(self,device_id):
         try:
             LatestLocationRequestModel(device_id=device_id)
-            # Get the latest location for the specified device ID
-            latest_location = self.redis_client.zrevrange(device_id, 0, 0, withscores=True)
+            # Get the latest location data for the device from Redis
+            # zrevrange funciton fetches 0,index element from the sorted set in descending order from the redis sorted set
+            latest_location = self.redis_client.zrevrange(device_id, 0, 0, withscores=False)
             if latest_location:
-                latest_location = latest_location[0]
-                latitude, longitude, timestamp = latest_location[0].decode('utf-8').split(',')
-                response_data = {
-                    'device_id': device_id,
-                    'latitude': float(latitude),
-                    'longitude': float(longitude),
-                    'timestamp': timestamp
-                }
-                return LatestLocationResponseModel(**response_data).dict()
+                latest_location_data = json.loads(latest_location[0])
+                latest_location_data['device_id'] = device_id
+                return LatestLocationResponseModel(**latest_location_data).dict()
             else:
-                return {'error': 'Device ID not found'}, 404
+                return {"message": "No data found for the device"}, 400
         except ValueError as e:
             return {'error': str(e)}, 400
         except Exception:
@@ -47,22 +42,34 @@ class StartEndLocation(Resource):
     def get(self,device_id):
         try:
             request_data = StartEndLocationRequestModel(device_id=device_id)
-            # Get the start and end location for the specified device ID
+
+            #Get the start and end locations for the device from Redis
             start_location = self.redis_client.zrange(device_id, 0, 0)
             end_location = self.redis_client.zrange(device_id, -1, -1)
+
             if start_location and end_location:
-                start_latitude, start_longitude, start_timestamp = start_location[0].decode('utf-8').split(',')
-                end_latitude, end_longitude, end_timestamp = end_location[0].decode('utf-8').split(',')
+                start_location_data = json.loads(start_location[0])
+                end_location_data = json.loads(end_location[0])
+
+                # start_location_tuple = start_location_data["location"]
+                # end_location_tuple = end_location_data["location"]
+
                 response_data = {
-                    'device_id': device_id,
-                    'start_location': {'latitude': float(start_latitude), 'longitude': float(start_longitude)},
-                    'start_timestamp': start_timestamp,
-                    'end_location': {'latitude': float(end_latitude), 'longitude': float(end_longitude)},
-                    'end_timestamp': end_timestamp
+                    "device_id": device_id,
+                    "start_location": {
+                        "location": start_location_data["location"],
+                        "timestamp": start_location_data["timestamp"],
+                        "speed": start_location_data["speed"]
+                    },
+                    "end_location": {
+                        "location": end_location_data["location"],
+                        "timestamp": end_location_data["timestamp"],
+                        "speed": end_location_data["speed"]
+                    }
                 }
                 return StartEndLocationResponseModel(**response_data).dict()
             else:
-                return {'error': 'Device ID not found'}, 404
+                return {"message": "No data found for the device"}, 404
         except ValueError as e:
             return {'error': str(e)}, 400
         except Exception:
@@ -90,24 +97,28 @@ class LocationPoints(Resource):
             # Convert start_time and end_time to datetime objects
             start_datetime = datetime.strptime(start_time, '%Y-%m-%dT%H:%M:%SZ')
             end_datetime = datetime.strptime(end_time, '%Y-%m-%dT%H:%M:%SZ')
-
-            if end_datetime <= start_datetime:
-                return {'error': 'End time must be later than start time'}, 400
             
             # Get location points for the specified device ID within the specified time range
-            location_points = self.redis_client.zrangebyscore(device_id, start_datetime.timestamp(), end_datetime.timestamp(), withscores=True)
+            location_points_json = self.redis_client.zrangebyscore(device_id, start_datetime.timestamp(), end_datetime.timestamp())
 
-            if location_points:
-                # Extract latitude, longitude, and timestamp from each location point
-                points = []
-                for location in location_points:
-                    latitude, longitude, timestamp = location[0].decode('utf-8').split(',')
-                    points.append({
-                        'latitude': float(latitude),
-                        'longitude': float(longitude),
-                        'timestamp': timestamp
-                    })
-                return LocationPointsResponseModel(response=points).dict()
+            if location_points_json:
+                # Convert JSON strings back to Python dictionaries
+                location_points = []
+                for point_json in location_points_json:
+                    point_data = json.loads(point_json)
+                    new_point_data = {
+                        'latitude': float(point_data['location'][0]),
+                        'longitude': float(point_data['location'][1]),
+                        'timestamp': point_data['timestamp']
+                    }
+                    location_points.append(LocationPointModel(**new_point_data))
+                
+                response_data = {
+                    'device_id': device_id,
+                    'location_points': location_points
+                }
+                
+                return LocationPointsResponseModel(**response_data).dict(), 200
             else:
                 return {'error': 'No location points found within the specified time range'}, 404
             

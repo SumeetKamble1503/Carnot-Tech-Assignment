@@ -3,17 +3,26 @@ from typing import List
 
 class LatestLocationResponseModel(BaseModel):
     device_id: str
-    latitude: float
-    longitude: float
+    location: tuple
     timestamp: str
+    speed: int
 
+class LocationModel(BaseModel):
+    location: tuple
+    timestamp: str
+    speed: int
 class StartEndLocationResponseModel(BaseModel):
     device_id: str
-    start_location: dict
-    start_timestamp: str
-    end_location: dict
-    end_timestamp: str
+    start_location: LocationModel
+    end_location: LocationModel
+    
 
+class LocationPointModel(BaseModel):
+    longitude: float
+    latitude: float
+    timestamp: str
+    
 class LocationPointsResponseModel(BaseModel):
-    response: List[dict]
+    device_id: str
+    location_points: List[LocationPointModel]
 
