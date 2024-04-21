@@ -11,4 +11,3 @@ flask-resources==1.2.0
 pandas==2.2.2
 redis==5.0.3
 pydantic==1.9.0
-python-dotenv==1.0.1

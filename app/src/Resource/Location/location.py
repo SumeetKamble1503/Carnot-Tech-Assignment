@@ -1,9 +1,8 @@
 import json
-from flask import Flask, request, jsonify
-from flask_restful import Resource, reqparse
+from flask import request
+from flask_restful import Resource
 from flask import make_response, current_app as app
 import traceback
-import redis
 from datetime import datetime
 from src.Models import LatestLocationRequestModel, LatestLocationResponseModel
 from src.Models import StartEndLocationRequestModel, StartEndLocationResponseModel
