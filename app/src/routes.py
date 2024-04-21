@@ -1,5 +1,3 @@
-
-# from flask_restful import Api
 from src.Resource.Location import *
 from src.Resource.Redis import *
 

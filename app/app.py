@@ -1,10 +1,6 @@
-import datetime
 from flask import Flask, jsonify, request
-import pandas as pd
-import redis
 from src.routes import create_routes
-import json
-from flask_restful import reqparse,Api
+from flask_restful import Api
 from redis.client import Redis
 import os
  
@@ -19,7 +15,6 @@ def create_app():
 app = create_app()
 BASE_PATH = '/api/v1/'
 
-# CORS(app)
 api = Api(app, BASE_PATH)
 create_routes(api)
 

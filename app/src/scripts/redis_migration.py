@@ -74,15 +74,9 @@ class RedisDataMigration():
             import os
             # Get the current working directory
             current_directory = os.getcwd()
-
-            # Define the relative path to the file from the current directory
             relative_path = 'assignment/raw_data (4) (6).csv'
-
-            # Join the current directory with the relative path to get the absolute file path
             absolute_path = os.path.join(current_directory, relative_path)
 
-            print(absolute_path)
-            # return ({'message': 'Data transferred to Redis successfully!'})
             # Load Excel file into DataFrame
             df = pd.read_csv(absolute_path)
 

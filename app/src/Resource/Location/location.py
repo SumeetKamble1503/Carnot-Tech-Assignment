@@ -8,12 +8,10 @@ from datetime import datetime
 from src.Models import LatestLocationRequestModel, LatestLocationResponseModel
 from src.Models import StartEndLocationRequestModel, StartEndLocationResponseModel
 from src.Models import LocationPointsRequestModel, LocationPointsResponseModel, LocationPointModel
-from pydantic import ValidationError
 
 class LatestLocation(Resource):
     def __init__(self):
         self.redis_client = app.config['REDIS_CLIENT']
-        # self.redis_client = redis.StrictRedis(host='redis', port=6379, db=0)
         
     def get(self,device_id):
         try:
@@ -37,11 +35,10 @@ class LatestLocation(Resource):
 class StartEndLocation(Resource):
     def __init__(self):
         self.redis_client = app.config['REDIS_CLIENT']
-        # self.redis_client = redis.StrictRedis(host='redis', port=6379, db=0)
     
     def get(self,device_id):
         try:
-            request_data = StartEndLocationRequestModel(device_id=device_id)
+            StartEndLocationRequestModel(device_id=device_id)
 
             #Get the start and end locations for the device from Redis
             start_location = self.redis_client.zrange(device_id, 0, 0)
@@ -50,9 +47,6 @@ class StartEndLocation(Resource):
             if start_location and end_location:
                 start_location_data = json.loads(start_location[0])
                 end_location_data = json.loads(end_location[0])
-
-                # start_location_tuple = start_location_data["location"]
-                # end_location_tuple = end_location_data["location"]
 
                 response_data = {
                     "device_id": device_id,
@@ -79,17 +73,12 @@ class StartEndLocation(Resource):
 class LocationPoints(Resource):
     def __init__(self):
         self.redis_client = app.config['REDIS_CLIENT']
-        # self.redis_client = redis.StrictRedis(host='redis', port=6379, db=0)
-        self.parser = reqparse.RequestParser()
-        self.parser.add_argument('start_time', type=str, help='Start time (format: YYYY-MM-DDTHH:MM:SSZ)')
-        self.parser.add_argument('end_time', type=str, help='End time (format: YYYY-MM-DDTHH:MM:%SSZ)')
     
     def post(self,device_id):
         try:
             request_data = request.json
             # Check the request data
             LocationPointsRequestModel(device_id=device_id, start_time=request_data.get('start_time'), end_time=request_data.get('end_time'))
-            
             
             start_time = request_data.get('start_time')
             end_time = request_data.get('end_time')
