@@ -6,13 +6,6 @@ echo $cmd
 
 echo "Env: $ENVIRONMENT"
 
-# if
-#     wget -O /opt/global-bundle.pem https://truststore.pki.rds.amazonaws.com/global/global-bundle.pem
-# then
-#     ls /opt
-# else
-#     echo file not fetched
-# fi
 
 if [ -f .env ]; then
     source .env
